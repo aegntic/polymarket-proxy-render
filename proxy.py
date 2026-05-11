@@ -5,6 +5,7 @@ Deploy on Render.com free tier (US/Oregon region).
 """
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.request
+import urllib.error
 import ssl
 import os
 import sys
@@ -44,6 +45,14 @@ class ProxyHandler(BaseHTTPRequestHandler):
                         self.send_header(key, value)
                 self.end_headers()
                 self.wfile.write(resp.read())
+        except urllib.error.HTTPError as e:
+            # Pass through upstream errors including body
+            self.send_response(e.code)
+            for key, value in e.headers.items():
+                if key.lower() not in ("transfer-encoding", "connection"):
+                    self.send_header(key, value)
+            self.end_headers()
+            self.wfile.write(e.read())
         except Exception as e:
             self.send_response(502)
             self.end_headers()
