@@ -4,5 +4,5 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: ""
+    buildCommand: pip install httpx
     startCommand: python proxy.py
